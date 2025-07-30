@@ -4,3 +4,31 @@
 # 3 compiles, 1 failed with 2 errors.
 # Compile of arm_multi+.sv was successful.
 # Compile of arm_multi+.sv was successful.
+vsim -gui work.testbench
+# vsim -gui work.testbench 
+# Start time: 12:51:15 on Jul 30,2025
+# Loading sv_std.std
+# Loading work.testbench
+# Loading work.top
+# Loading work.arm
+# Loading work.controller
+# Loading work.decoder
+# Loading work.mainfsm
+# Loading work.condlogic
+# Loading work.flopenr
+# Loading work.condcheck
+# Loading work.flopr
+# Loading work.datapath
+# Loading work.mux2
+# Loading work.regfile
+# Loading work.extend
+# Loading work.mux3
+# Loading work.alu
+# Loading work.mem
+add wave -position end  sim:/testbench/dut/clk
+add wave -position end  sim:/testbench/dut/reset
+add wave -position end  sim:/testbench/dut/arm/dp/PC
+add wave -position 2  sim:/testbench/dut/arm/dp/Instr
+add wave -position end  sim:/testbench/dut/arm/dp/rf/rf
+# End time: 12:53:00 on Jul 30,2025, Elapsed time: 0:01:45
+# Errors: 0, Warnings: 8
