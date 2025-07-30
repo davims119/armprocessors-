@@ -146,7 +146,7 @@ module imem(input  logic [31:0] a,
   logic [31:0] RAM[63:0];
 
   initial
-      $readmemh("memfile.dat",RAM);
+      $readmemh("memfile+.dat",RAM);
 
   assign rd = RAM[a[31:2]]; // word aligned
 endmodule
@@ -439,6 +439,7 @@ module alu(input  logic [31:0] a, b,
       3'b00?: Result = sum;	//ADDED A BIT FOR MOV
       3'b010: Result = a & b;	//ADDED A BIT FOR MOV
       3'b011: Result = a | b;	//ADDED A BIT FOR MOV
+      3'b100: Result = condinvb;	//MOV ADDED
     endcase
 
   assign neg      = Result[31];
