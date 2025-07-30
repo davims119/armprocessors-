@@ -1,56 +1,6 @@
-D:/armprocessors-/arm_multi+.sv {1 {vlog -work work -sv -stats=none D:/armprocessors-/arm_multi+.sv
-Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
--- Compiling module testbench
--- Compiling module top
--- Compiling module mem
--- Compiling module arm
--- Compiling module controller
--- Compiling module decoder
--- Compiling module mainfsm
--- Compiling module condlogic
--- Compiling module condcheck
--- Compiling module datapath
--- Compiling module regfile
--- Compiling module extend
--- Compiling module adder
--- Compiling module flopenr
--- Compiling module flopr
--- Compiling module mux2
--- Compiling module mux3
--- Compiling module alu
-
-Top level modules:
-	testbench
-	adder
-
-} {} {}} D:/armprocessors-/memfile.s {0 {vlog -work work -stats=none D:/armprocessors-/memfile.s
+D:/armprocessors-/memfile.s {0 {vlog -work work -stats=none D:/armprocessors-/memfile.s
 Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
 ** Error: (vlog-13069) D:/armprocessors-/memfile.s(8): near "SUB": syntax error, unexpected IDENTIFIER.
 ** Error: D:/armprocessors-/memfile.s(8): (vlog-13205) Syntax error found in the scope following 'MAIN'. Is there a missing '::'?
 
-} {3.0 5.0} {}} D:/armprocessors-/arm_multi.sv {1 {vlog -work work -sv -stats=none D:/armprocessors-/arm_multi.sv
-Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
--- Compiling module testbench
--- Compiling module top
--- Compiling module mem
--- Compiling module arm
--- Compiling module controller
--- Compiling module decoder
--- Compiling module mainfsm
--- Compiling module condlogic
--- Compiling module condcheck
--- Compiling module datapath
--- Compiling module regfile
--- Compiling module extend
--- Compiling module adder
--- Compiling module flopenr
--- Compiling module flopr
--- Compiling module mux2
--- Compiling module mux3
--- Compiling module alu
-
-Top level modules:
-	testbench
-	adder
-
-} {} {}}
+} {3.0 5.0} {}}
