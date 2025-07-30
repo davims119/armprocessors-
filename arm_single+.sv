@@ -239,7 +239,7 @@ module decoder(input  logic [1:0] Op,
   	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR MOV
   	    4'b0000: ALUControl = 3'b010; // AND		ADDED A BIT FOR MOV
   	    4'b1100: ALUControl = 3'b011; // ORR		ADDED A BIT FOR MOV
-  	    4'b0100: ALUControl = 3'b000; // MOV - ADDEED	ADDED A BIT FOR MOV
+  	    4'b0100: ALUControl = 3'b100; // MOV - ADDEED	ADDED A BIT FOR MOV
   	    default: ALUControl = 3'bx;  // unimplemented
       endcase
       // update flags if S bit is set 
@@ -429,17 +429,24 @@ module alu(input  logic [31:0] a, b,
 
   logic        neg, zero, carry, overflow;
   logic [31:0] condinvb;
+  logic [31:0] amov;	//FOR MOV EXECUTION
   logic [32:0] sum;
+  
+  always_comb	//MAKING a = 0 FOR MOV EXECUTION
+    if (ALUControl == 3'b100)
+      amov = 32'b0;
+    else
+      amov = a;
 
   assign condinvb = ALUControl[0] ? ~b : b;
-  assign sum = a + condinvb + ALUControl[0];
+  assign sum = amov + condinvb + ALUControl[0];
 
   always_comb
-    casex (ALUControl[1:0])
+    casex (ALUControl[2:0])	//ADDED A BIT FOR MOV
       3'b00?: Result = sum;	//ADDED A BIT FOR MOV
       3'b010: Result = a & b;	//ADDED A BIT FOR MOV
       3'b011: Result = a | b;	//ADDED A BIT FOR MOV
-      3'b100: Result = condinvb;	//MOV ADDED
+      3'b100: Result = sum;	//MOV ADDED
     endcase
 
   assign neg      = Result[31];
