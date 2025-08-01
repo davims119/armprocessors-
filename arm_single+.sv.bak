@@ -146,7 +146,7 @@ module imem(input  logic [31:0] a,
   logic [31:0] RAM[63:0];
 
   initial
-      $readmemh("memfile+.dat",RAM);
+      $readmemh("memfile2.dat",RAM);
 
   assign rd = RAM[a[31:2]]; // word aligned
 endmodule
@@ -205,7 +205,7 @@ module decoder(input  logic [1:0] Op,
                output logic       PCS, RegW, MemW,
                output logic       MemtoReg, ALUSrc,
                output logic [1:0] ImmSrc, RegSrc,
-               output logic [2:0] ALUControl);	//ADDED A BIT FOR MOV
+	       output logic [2:0] ALUControl);	//ADDED A BIT FOR MOV
 
   logic [9:0] controls;
   logic       Branch, ALUOp;
@@ -215,15 +215,15 @@ module decoder(input  logic [1:0] Op,
   always_comb
   	case(Op)
   	                        // Data processing immediate
-  	  2'b00: if (Funct[5])  controls = 10'b0000101001; 
+  	  2'b00: if (Funct[5])  controls = 10'b0000101001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
   	                        // Data processing register
-  	         else           controls = 10'b0000001001; 
+  	         else           controls = 10'b0000001001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
   	                        // LDR
-  	  2'b01: if (Funct[0])  controls = 10'b0001111000; 
+  	  2'b01: if (Funct[0])  controls = 10'b0001111000; //RegSrc = 00, ImmSrc = 01, ALUSrc = 1, MemtoReg = 1, RegW = 1, MemW = 0, Branch = 0, ALUOp = 0
   	                        // STR
-  	         else           controls = 10'b1001110100; 
+  	         else           controls = 10'b1001110100; //RegSrc = 10, ImmSrc = 01, ALUSrc = 1, MemtoReg = 1, RegW = 0, MemW = 1, Branch = 0, ALUOp = 0
   	                        // B
-  	  2'b10:                controls = 10'b0110100010; 
+  	  2'b10:                controls = 10'b0110100010; //RegSrc = 01, ImmSrc = 10, ALUSrc = 1, MemtoReg = 0, RegW = 0, MemW = 0, Branch = 1, ALUOp = 0
   	                        // Unimplemented
   	  default:              controls = 10'bx;          
   	endcase
@@ -235,11 +235,14 @@ module decoder(input  logic [1:0] Op,
   always_comb
     if (ALUOp) begin                 // which DP Instr?
       case(Funct[4:1]) 
-  	    4'b0100: ALUControl = 3'b000; // ADD		ADDED A BIT FOR MOV
-  	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR MOV
   	    4'b0000: ALUControl = 3'b010; // AND		ADDED A BIT FOR MOV
-  	    4'b1100: ALUControl = 3'b011; // ORR		ADDED A BIT FOR MOV
-  	    4'b0100: ALUControl = 3'b100; // MOV - ADDEED	ADDED A BIT FOR MOV
+	    4'b0001: ALUControl = 3'b011; // ORR		ADDED A BIT FOR MOV
+  	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR MOV
+	    4'b0100: ALUControl = 3'b000; // ADD		ADDED A BIT FOR MOV
+	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR MOV
+  	    4'b1010: ALUControl = 3'b101; // CMP - ADDED	ADDED A BIT FOR MOV
+	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR MOV
+	    4'b1101: ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
   	    default: ALUControl = 3'bx;  // unimplemented
       endcase
       // update flags if S bit is set 
@@ -247,9 +250,9 @@ module decoder(input  logic [1:0] Op,
       FlagW[1]      = Funct[0]; // FlagW[1] = S-bit
 	// FlagW[0] = S-bit & (ADD | SUB)
       FlagW[0]      = Funct[0] & 
-        (ALUControl == 3'b000 | ALUControl == 3'b001); 
+        (ALUControl == 3'b000 | ALUControl == 3'b001);	//ADDED A BIT FOR MOV
     end else begin
-      ALUControl = 3'b000; // add for non-DP instructions
+      ALUControl = 3'b000; // add for non-DP instructions	ADDED A BIT FOR MOV
       FlagW      = 2'b00; // don't update Flags
     end
               
@@ -423,39 +426,38 @@ endmodule
 
 
 module alu(input  logic [31:0] a, b,
-           input  logic [2:0]  ALUControl,	//ADDED A BIT FOR MOV
+           input  logic [2:0]  ALUControl, //ADDED A BIT FOR MOV
            output logic [31:0] Result,
            output logic [3:0]  ALUFlags);
 
   logic        neg, zero, carry, overflow;
   logic [31:0] condinvb;
-  logic [31:0] amov;	//FOR MOV EXECUTION
   logic [32:0] sum;
-  
-  always_comb	//MAKING a = 0 FOR MOV EXECUTION
-    if (ALUControl == 3'b100)
-      assign amov = 32'b0;
+  logic [31:0] a_mod;
+
+  always_comb		//MAKING a = 0 FOR MOV EXECUTION
+    if (ALUControl == 3'b110)
+      a_mod = 32'b0;
     else
-      assign amov = a;
+      a_mod = a;
 
   assign condinvb = ALUControl[0] ? ~b : b;
-  assign sum = amov + condinvb + ALUControl[0];
+  assign sum = a_mod + condinvb + ALUControl[0];
 
   always_comb
-    casex (ALUControl[2:0])	//ADDED A BIT FOR MOV
-      3'b00?: Result = sum;	//ADDED A BIT FOR MOV
-      3'b010: Result = a & b;	//ADDED A BIT FOR MOV
-      3'b011: Result = a | b;	//ADDED A BIT FOR MOV
-      3'b100: Result = sum;	//MOV ADDED
+    casex (ALUControl[2:0])
+      3'b00?: Result = sum;
+      3'b010: Result = a & b;
+      3'b011: Result = a | b;
+      3'b100: Result = a ^ b;	//EOR
+      3'b110: Result = sum;	//MOV
     endcase
 
   assign neg      = Result[31];
   assign zero     = (Result == 32'b0);
-  assign carry    = (ALUControl[1] == 1'b0) & sum[32];
-  assign overflow = (ALUControl[1] == 1'b0) & 
+  assign carry    = (ALUControl[2:1] == 2'b00) & sum[32];
+  assign overflow = (ALUControl[2:1] == 2'b00) & 
                     ~(a[31] ^ b[31] ^ ALUControl[0]) & 
                     (a[31] ^ sum[31]); 
   assign ALUFlags    = {neg, zero, carry, overflow};
 endmodule
-
-
