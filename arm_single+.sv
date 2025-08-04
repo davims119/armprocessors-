@@ -215,9 +215,19 @@ module decoder(input  logic [1:0] Op,
   always_comb
   	case(Op)
   	                        // Data processing immediate
-  	  2'b00: if (Funct[5])  controls = 10'b0000101001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
+  	  2'b00: if (Funct[5]) begin
+		 		// CHECK FOR CMP OR TST INSTRUCTIONS TO MAKE RegW = 0
+      		 	if (Funct[4:1] == 4'b1010 || Funct[4:1] == 4'b1000)	controls = 10'b0000100001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 0, MemW = 0, Branch = 0, ALUOp = 1
+				// OTHER DP IMMEDIATE
+      		 	else	controls = 10'b0000101001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
+    		 end
   	                        // Data processing register
-  	         else           controls = 10'b0000001001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
+  	         else begin
+		 		// CHECK FOR CMP OR TST INSTRUCTIONS TO MAKE RegW = 0
+      			if (Funct[4:1] == 4'b1010 || Funct[4:1] == 4'b1000)	controls = 10'b0000000001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 0, MemW = 0, Branch = 0, ALUOp = 1
+				// OTHER DP REGISTER
+      			else	controls = 10'b0000001001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
+    		 end
   	                        // LDR
   	  2'b01: if (Funct[0])  controls = 10'b0001111000; //RegSrc = 00, ImmSrc = 01, ALUSrc = 1, MemtoReg = 1, RegW = 1, MemW = 0, Branch = 0, ALUOp = 0
   	                        // STR
@@ -240,7 +250,7 @@ module decoder(input  logic [1:0] Op,
   	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR MOV
 	    4'b0100: ALUControl = 3'b000; // ADD		ADDED A BIT FOR MOV
 	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR MOV
-  	    4'b1010: ALUControl = 3'b101; // CMP - ADDED	ADDED A BIT FOR MOV
+  	    4'b1010: ALUControl = 3'b001; // CMP - ADDED	ADDED A BIT FOR MOV
 	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR MOV
 	    4'b1101: ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
   	    default: ALUControl = 3'bx;  // unimplemented

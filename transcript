@@ -1,10 +1,7 @@
-# Compile of memfile.s failed with 2 errors.
-# Compile of arm_single.sv was successful.
 # Compile of arm_single+.sv was successful.
-# 3 compiles, 1 failed with 2 errors.
 vsim -gui work.testbench
 # vsim -gui work.testbench 
-# Start time: 12:04:08 on Aug 01,2025
+# Start time: 13:40:23 on Aug 04,2025
 # Loading sv_std.std
 # Loading work.testbench
 # Loading work.top
@@ -33,46 +30,11 @@ add wave -position 5  sim:/testbench/dut/arm/dp/alu/zero
 add wave -position 6  sim:/testbench/dut/arm/dp/alu/carry
 add wave -position 7  sim:/testbench/dut/arm/dp/alu/overflow
 run -all
-# ** Warning: (vsim-7) Failed to open readmem file "memfile2.dat" in read mode.
-# No such file or directory. (errno = ENOENT)    : D:/armprocessors-/arm_single+.sv(149)
-#    Time: 0 ps  Iteration: 0  Instance: /testbench/dut/imem
+# Simulation succeeded
+# ** Note: $stop    : D:/armprocessors-/arm_single+.sv(109)
+#    Time: 105 ps  Iteration: 1  Instance: /testbench
+# Break in Module testbench at D:/armprocessors-/arm_single+.sv line 109
 # Break key hit
 quit -sim
-# End time: 12:05:07 on Aug 01,2025, Elapsed time: 0:00:59
-# Errors: 0, Warnings: 3
-# Compile of arm_single+.sv was successful.
-vsim -gui work.testbench
-# vsim -gui work.testbench 
-# Start time: 12:05:44 on Aug 01,2025
-# Loading sv_std.std
-# Loading work.testbench
-# Loading work.top
-# Loading work.arm
-# Loading work.controller
-# Loading work.decoder
-# Loading work.condlogic
-# Loading work.flopenr
-# Loading work.condcheck
-# Loading work.datapath
-# Loading work.mux2
-# Loading work.flopr
-# Loading work.adder
-# Loading work.regfile
-# Loading work.extend
-# Loading work.alu
-# Loading work.imem
-# Loading work.dmem
-add wave -position end  sim:/testbench/dut/clk
-add wave -position end  sim:/testbench/dut/reset
-add wave -position end  sim:/testbench/dut/PC
-add wave -position end  sim:/testbench/dut/Instr
-add wave -position end  sim:/testbench/dut/arm/dp/rf/rf
-add wave -position 4  sim:/testbench/dut/arm/dp/alu/neg
-add wave -position 5  sim:/testbench/dut/arm/dp/alu/zero
-add wave -position 6  sim:/testbench/dut/arm/dp/alu/carry
-add wave -position 7  sim:/testbench/dut/arm/dp/alu/overflow
-run -all
-# Simulation failed
-# ** Note: $stop    : D:/armprocessors-/arm_single+.sv(112)
-#    Time: 105 ps  Iteration: 1  Instance: /testbench
-# Break in Module testbench at D:/armprocessors-/arm_single+.sv line 112
+# End time: 13:48:56 on Aug 04,2025, Elapsed time: 0:08:33
+# Errors: 0, Warnings: 2
