@@ -5,5 +5,6 @@
 	sub r2, r1, r0			//R2 = R1 - R0. R2 = 3
 	eor r3, r2, #0			//R3 = R2 XOR 0. R3 = R2
 	cmp r2, r3			//R2 - R3 = 0. FLAG Z = 1
-	addeq r4, r3, r0		//R4 = R3 + R0 IF Z = 1. R4 = 7
-	str r4, [r0, #0x60]		//WRITE R4 IN ADRESS 100
+	lsleq r4, r0, #1		//R4 = R0 << 1. R4 = 8
+	add r5, r0, r3			//R5 = R0 + R3. R5 = 7
+	str r5, [r4, #0x5c]		//WRITE R4 IN ADRESS 100

@@ -252,7 +252,9 @@ module decoder(input  logic [1:0] Op,
 	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR MOV
   	    4'b1010: ALUControl = 3'b001; // CMP - ADDED	ADDED A BIT FOR MOV
 	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR MOV
-	    4'b1101: ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
+		     //CHECK I(Funct[5] | Instr[24]) TO DECIDE MOV OR LSL EXECUTION
+	    4'b1101: if(Funct[5])	ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
+		     else		ALUControl = 3'b101; // LSL - ADDED
   	    default: ALUControl = 3'bx;  // unimplemented
       endcase
       // update flags if S bit is set 
@@ -460,6 +462,7 @@ module alu(input  logic [31:0] a, b,
       3'b010: Result = a & b;
       3'b011: Result = a | b;
       3'b100: Result = a ^ b;	//EOR
+      3'b101: Result = {a[30:0],1'b0};	//LSL
       3'b110: Result = sum;	//MOV
     endcase
 

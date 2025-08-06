@@ -216,16 +216,16 @@ module decoder(input  logic [1:0] Op,
   	case(Op)
   	                        // Data processing immediate
   	  2'b00: if (Funct[5]) begin
-		 		// CMP or TST
+		 		// CHECK FOR CMP OR TST INSTRUCTIONS TO MAKE RegW = 0
       		 	if (Funct[4:1] == 4'b1010 || Funct[4:1] == 4'b1000)	controls = 10'b0000100001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 0, MemW = 0, Branch = 0, ALUOp = 1
-				// Other DP Imm
+				// OTHER DP IMMEDIATE
       		 	else	controls = 10'b0000101001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 1, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
     		 end
   	                        // Data processing register
   	         else begin
-				// CMP or TST
+		 		// CHECK FOR CMP OR TST INSTRUCTIONS TO MAKE RegW = 0
       			if (Funct[4:1] == 4'b1010 || Funct[4:1] == 4'b1000)	controls = 10'b0000000001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 0, MemW = 0, Branch = 0, ALUOp = 1
-				// Other DP Reg
+				// OTHER DP REGISTER
       			else	controls = 10'b0000001001; //RegSrc = 00, ImmSrc = 00, ALUSrc = 0, MemtoReg = 0, RegW = 1, MemW = 0, Branch = 0, ALUOp = 1
     		 end
   	                        // LDR
