@@ -86,3 +86,43 @@ run -all
 # ** Note: $stop    : D:/armprocessors-/arm_single+.sv(109)
 #    Time: 115 ps  Iteration: 1  Instance: /testbench
 # Break in Module testbench at D:/armprocessors-/arm_single+.sv line 109
+quit -sim
+# End time: 14:06:38 on Aug 06,2025, Elapsed time: 1:04:17
+# Errors: 0, Warnings: 1
+# Compile of arm_single+.sv failed with 3 errors.
+# Compile of arm_single+.sv was successful.
+vsim -gui work.testbench
+# vsim -gui work.testbench 
+# Start time: 14:37:38 on Aug 06,2025
+# Loading sv_std.std
+# Loading work.testbench
+# Loading work.top
+# Loading work.arm
+# Loading work.controller
+# Loading work.decoder
+# Loading work.condlogic
+# Loading work.flopenr
+# Loading work.condcheck
+# Loading work.datapath
+# Loading work.mux2
+# Loading work.flopr
+# Loading work.adder
+# Loading work.regfile
+# Loading work.extend
+# Loading work.alu
+# Loading work.imem
+# Loading work.dmem
+add wave -position end  sim:/testbench/dut/arm/dp/clk
+add wave -position end  sim:/testbench/dut/arm/dp/reset
+add wave -position end  sim:/testbench/dut/arm/dp/PC
+add wave -position end  sim:/testbench/dut/arm/dp/Instr
+add wave -position end  sim:/testbench/dut/arm/dp/rf/rf
+add wave -position 4  sim:/testbench/dut/arm/dp/alu/neg
+add wave -position 5  sim:/testbench/dut/arm/dp/alu/zero
+add wave -position 6  sim:/testbench/dut/arm/dp/alu/carry
+add wave -position 7  sim:/testbench/dut/arm/dp/alu/overflow
+run -all
+# Simulation failed
+# ** Note: $stop    : D:/armprocessors-/arm_single+.sv(112)
+#    Time: 125 ps  Iteration: 1  Instance: /testbench
+# Break in Module testbench at D:/armprocessors-/arm_single+.sv line 112

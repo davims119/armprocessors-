@@ -6,5 +6,6 @@
 	eor r3, r2, #0			//R3 = R2 XOR 0. R3 = R2
 	cmp r2, r3			//R2 - R3 = 0. FLAG Z = 1
 	lsleq r4, r0, #1		//R4 = R0 << 1. R4 = 8
-	add r5, r0, r3			//R5 = R0 + R3. R5 = 7
-	str r5, [r4, #0x5c]		//WRITE R4 IN ADRESS 100
+	asr r4, r4, #1			//R4 = R4 >> 1. R4 = 4
+	add r5, r4, r3			//R5 = R4 + R3. R5 = 7
+	str r5, [r4, #0x60]		//WRITE R4 IN ADRESS 100

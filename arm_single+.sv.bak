@@ -164,7 +164,7 @@ module arm(input  logic        clk, reset,
   logic [1:0] RegSrc, ImmSrc;
   logic [2:0] ALUControl;	//ADDED A BIT FOR MOV
 
-  controller c(clk, reset, Instr[31:12], ALUFlags, 
+  controller c(clk, reset, Instr[31:4], ALUFlags,	//CHANGE Instr SIZE TO CHECK WHICH SHIFT INSTRUCTION TO EXECUTE(MOV, LSL, ASR)
                RegSrc, RegWrite, ImmSrc, 
                ALUSrc, ALUControl,
                MemWrite, MemtoReg, PCSrc);
@@ -177,7 +177,7 @@ module arm(input  logic        clk, reset,
 endmodule
 
 module controller(input  logic         clk, reset,
-                  input  logic [31:12] Instr,
+                  input  logic [31:4] Instr,	//CHANGE Instr SIZE TO CHECK WHICH SHIFT INSTRUCTION TO EXECUTE(MOV, LSL, ASR)
                   input  logic [3:0]   ALUFlags,
                   output logic [1:0]   RegSrc,
                   output logic         RegWrite,
@@ -190,7 +190,7 @@ module controller(input  logic         clk, reset,
   logic [1:0] FlagW;
   logic       PCS, RegW, MemW;
   
-  decoder dec(Instr[27:26], Instr[25:20], Instr[15:12],
+  decoder dec(Instr[27:26], Instr[25:20], Instr[15:12], Instr[11:4]
               FlagW, PCS, RegW, MemW,
               MemtoReg, ALUSrc, ImmSrc, RegSrc, ALUControl);
   condlogic cl(clk, reset, Instr[31:28], ALUFlags,
@@ -201,6 +201,7 @@ endmodule
 module decoder(input  logic [1:0] Op,
                input  logic [5:0] Funct,
                input  logic [3:0] Rd,
+	       input  logic [7:0] Src2,		//ADDED FOR SHIFT INSTRUCTION CHECK
                output logic [1:0] FlagW,
                output logic       PCS, RegW, MemW,
                output logic       MemtoReg, ALUSrc,
@@ -252,7 +253,14 @@ module decoder(input  logic [1:0] Op,
 	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR MOV
   	    4'b1010: ALUControl = 3'b001; // CMP - ADDED	ADDED A BIT FOR MOV
 	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR MOV
-	    4'b1101: ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
+		     //CHECK WHICH SHIFT INSTRUCTIONS EXECUTION(MOV, LSL, ASR)
+		     //MOV I = 1 OR Instr[11:4] = 0
+	    4'b1101: if(Funct[5] || Src2 == 8'b00000000)	ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
+		     else begin
+			//LSL I = 0 AND Instr[6:5] = 00
+			if(Src2[2:1] == 2'b00)			ALUControl = 3'b101; // LSL - ADDED
+			//ASR I = 0 AND Instr[6:5] = 10
+			else if(Src2[2:1] == 2'b10)		ALUControl = 3'b111; // ASR - ADDED
   	    default: ALUControl = 3'bx;  // unimplemented
       endcase
       // update flags if S bit is set 
@@ -459,8 +467,10 @@ module alu(input  logic [31:0] a, b,
       3'b00?: Result = sum;
       3'b010: Result = a & b;
       3'b011: Result = a | b;
-      3'b100: Result = a ^ b;	//EOR
-      3'b110: Result = sum;	//MOV
+      3'b100: Result = a ^ b;		//EOR
+      3'b101: Result = {a[30:0],1'b0};	//LSL
+      3'b110: Result = sum;		//MOV
+      3'b111: Result = {1'b0, a[31:1]};	//ASR
     endcase
 
   assign neg      = Result[31];
