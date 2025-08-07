@@ -1,5 +1,5 @@
 // arm_single+.sv
-// davi.soares@ifes.edu.br 30 July 2025
+// davi.soares@ifes.edu.br 07 August 2025
 // Expansion of Single-cycle implementation of a subset of ARMv4
 // Based on
 // arm_single.sv
@@ -162,7 +162,7 @@ module arm(input  logic        clk, reset,
   logic       RegWrite, 
               ALUSrc, MemtoReg, PCSrc;
   logic [1:0] RegSrc, ImmSrc;
-  logic [2:0] ALUControl;	//ADDED A BIT FOR MOV
+  logic [2:0] ALUControl;	//ADDED A BIT FOR SHIFT INSTRUCTIONS
 
   controller c(clk, reset, Instr[31:4], ALUFlags,	//CHANGE Instr SIZE TO CHECK WHICH SHIFT INSTRUCTION TO EXECUTE(MOV, LSL, ASR)
                RegSrc, RegWrite, ImmSrc, 
@@ -183,7 +183,7 @@ module controller(input  logic         clk, reset,
                   output logic         RegWrite,
                   output logic [1:0]   ImmSrc,
                   output logic         ALUSrc, 
-                  output logic [2:0]   ALUControl,	//ADDED A BIT FOR MOV
+                  output logic [2:0]   ALUControl,	//ADDED A BIT FOR SHIFT INSTRUCTIONS
                   output logic         MemWrite, MemtoReg,
                   output logic         PCSrc);
 
@@ -201,12 +201,12 @@ endmodule
 module decoder(input  logic [1:0] Op,
                input  logic [5:0] Funct,
                input  logic [3:0] Rd,
-	       input  logic [7:0] Src2,		//ADDED FOR SHIFT INSTRUCTION CHECK
+	       input  logic [7:0] Src2,		//ADDED FOR SHIFT INSTRUCTION CHECK AND EXECUTION
                output logic [1:0] FlagW,
                output logic       PCS, RegW, MemW,
                output logic       MemtoReg, ALUSrc,
                output logic [1:0] ImmSrc, RegSrc,
-	       output logic [2:0] ALUControl);	//ADDED A BIT FOR MOV
+	       output logic [2:0] ALUControl);	//ADDED A BIT FOR SHIFT INSTRUCTIONS
 
   logic [9:0] controls;
   logic       Branch, ALUOp;
@@ -246,16 +246,16 @@ module decoder(input  logic [1:0] Op,
   always_comb
     if (ALUOp) begin                 // which DP Instr?
       case(Funct[4:1]) 
-  	    4'b0000: ALUControl = 3'b010; // AND		ADDED A BIT FOR MOV
-	    4'b0001: ALUControl = 3'b011; // ORR		ADDED A BIT FOR MOV
-  	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR MOV
-	    4'b0100: ALUControl = 3'b000; // ADD		ADDED A BIT FOR MOV
-	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR MOV
-  	    4'b1010: ALUControl = 3'b001; // CMP - ADDED	ADDED A BIT FOR MOV
-	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR MOV
-		     //CHECK WHICH SHIFT INSTRUCTIONS EXECUTION(MOV, LSL, ASR)
+  	    4'b0000: ALUControl = 3'b010; // AND		ADDED A BIT FOR SHIFT INSTRUCTIONS
+	    4'b0001: ALUControl = 3'b011; // ORR		ADDED A BIT FOR SHIFT INSTRUCTIONS
+  	    4'b0010: ALUControl = 3'b001; // SUB		ADDED A BIT FOR SHIFT INSTRUCTIONS
+	    4'b0100: ALUControl = 3'b000; // ADD		ADDED A BIT FOR SHIFT INSTRUCTIONS
+	    4'b1000: ALUControl = 3'b010; // TST - ADDED	ADDED A BIT FOR SHIFT INSTRUCTIONS
+  	    4'b1010: ALUControl = 3'b001; // CMP - ADDED	ADDED A BIT FOR SHIFT INSTRUCTIONS
+	    4'b1100: ALUControl = 3'b100; // EOR - ADDED	ADDED A BIT FOR SHIFT INSTRUCTIONS
+		     //CHECK WHICH SHIFT INSTRUCTION TO EXECUTE(MOV, LSL, ASR)
 		     //MOV I = 1 OR Instr[11:4] = 0
-	    4'b1101: if(Funct[5] || Src2 == 8'b00000000)	ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR MOV
+	    4'b1101: if(Funct[5] || Src2 == 8'b00000000)	ALUControl = 3'b110; // MOV - ADDED	ADDED A BIT FOR SHIFT INSTRUCTIONS
 		     else begin
 			//LSL I = 0 AND Instr[6:5] = 00
 			if(Src2[2:1] == 2'b00)			ALUControl = 3'b101; // LSL - ADDED
@@ -269,12 +269,11 @@ module decoder(input  logic [1:0] Op,
       FlagW[1]      = Funct[0]; // FlagW[1] = S-bit
 	// FlagW[0] = S-bit & (ADD | SUB)
       FlagW[0]      = Funct[0] & 
-        (ALUControl == 3'b000 | ALUControl == 3'b001);	//ADDED A BIT FOR MOV
+        (ALUControl == 3'b000 | ALUControl == 3'b001);	//ADDED A BIT FOR SHIFT INSTRUCTIONS
     end else begin
-      ALUControl = 3'b000; // add for non-DP instructions	ADDED A BIT FOR MOV
+      ALUControl = 3'b000; // add for non-DP instructions	ADDED A BIT FOR SHIFT INSTRUCTIONS
       FlagW      = 2'b00; // don't update Flags
     end
-              
   // PC Logic
   assign PCS  = ((Rd == 4'b1111) & RegW) | Branch; 
 endmodule
@@ -338,7 +337,7 @@ module datapath(input  logic        clk, reset,
                 input  logic        RegWrite,
                 input  logic [1:0]  ImmSrc,
                 input  logic        ALUSrc,
-                input  logic [2:0]  ALUControl,	//ADDED A BIT FOR MOV
+                input  logic [2:0]  ALUControl,	//ADDED A BIT FOR SHIFT INSTRUCTIONS
                 input  logic        MemtoReg,
                 input  logic        PCSrc,
                 output logic [3:0]  ALUFlags,
@@ -368,7 +367,7 @@ module datapath(input  logic        clk, reset,
 
   // ALU logic
   mux2 #(32)  srcbmux(WriteData, ExtImm, ALUSrc, SrcB);
-  alu         alu(SrcA, SrcB, ALUControl, 
+  alu         alu(SrcA, SrcB, ALUControl, Instr[11:7],		//ADDED Instr[11:7](shamt5) FOR SHIFT INSTRUCTIONS EXECUTION
                   ALUResult, ALUFlags);
 endmodule
 
@@ -445,14 +444,16 @@ endmodule
 
 
 module alu(input  logic [31:0] a, b,
-           input  logic [2:0]  ALUControl, //ADDED A BIT FOR MOV
+           input  logic [2:0]  ALUControl,	//ADDED A BIT FOR SHIFT INSTRUCTIONS
+	   input  logic [4:0]  shift,		//ADDED FOR SHIFT INSTRUCTION EXECUTION
            output logic [31:0] Result,
            output logic [3:0]  ALUFlags);
 
   logic        neg, zero, carry, overflow;
   logic [31:0] condinvb;
   logic [32:0] sum;
-  logic [31:0] a_mod;
+  logic [31:0] a_mod;		//ADDED FOR MOV EXECUTION
+  logic signed [31:0] a_signed;	//ADDED FOR ASR EXECUTION
 
   always_comb		//MAKING a = 0 FOR MOV EXECUTION
     if (ALUControl == 3'b110)
@@ -462,16 +463,17 @@ module alu(input  logic [31:0] a, b,
 
   assign condinvb = ALUControl[0] ? ~b : b;
   assign sum = a_mod + condinvb + ALUControl[0];
+  assign a_signed = a;	//MAKING a SIGNED
 
   always_comb
     casex (ALUControl[2:0])
       3'b00?: Result = sum;
       3'b010: Result = a & b;
       3'b011: Result = a | b;
-      3'b100: Result = a ^ b;		//EOR
-      3'b101: Result = {a[30:0],1'b0};	//LSL
-      3'b110: Result = sum;		//MOV
-      3'b111: Result = {1'b0, a[31:1]};	//ASR
+      3'b100: Result = a ^ b;			//EOR
+      3'b101: Result = a << shift;		//LSL
+      3'b110: Result = sum;			//MOV
+      3'b111: Result = a_signed >>> shift;	//ASR
     endcase
 
   assign neg      = Result[31];
